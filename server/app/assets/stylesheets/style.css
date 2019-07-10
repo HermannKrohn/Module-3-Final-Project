@@ -1,0 +1,37 @@
+body,html{
+  height: 100%;
+  margin: 0;
+}
+
+.container{
+  margin: 0px;
+  justify-content: space-evenly;
+  background-color: rgb(0, 0, 0);
+  display: flex;
+  color: green;
+  height: 100%;
+}
+
+.column{
+  background-color: rgb(255, 255, 255);
+  width: 31%;
+  height: 90%;
+  margin-top: 2%;
+  border-radius: 25px;
+}
+
+.x{
+  text-align: center;
+  height: 70%;
+  width: 100%;
+  /* display:inline-block; */
+  /* vertical-align: middle; */
+  /* transform: translateY(10%); */
+  position: relative;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+}
+
+
