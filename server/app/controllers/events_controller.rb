@@ -15,7 +15,7 @@ class EventsController < ApplicationController
         }
         )
     end
-
+ 
 
     def self.get_calendars(access_token, refresh_token)
         puts "calendar"

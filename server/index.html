@@ -15,7 +15,7 @@
               gapi.load('auth2', function() {
                 auth2 = gapi.auth2.init({
                   client_id: '247563481751-5v3guf2mir8tffh60n3k80trolcp7cid.apps.googleusercontent.com',
-                  scope: "https://mail.google.com"
+                  scope: "https://mail.google.com https://www.googleapis.com/auth/calendar"
                   // Scopes to request in addition to 'profile' and 'email'
                   //scope: 'additional_scope'
                 });
@@ -23,9 +23,9 @@
             }
           </script>
 </head>
-<body> 
+<body>
     <div class="container">
-        
+
         <div class="POI-Area column">
             <div class="x">
                 1
@@ -33,13 +33,13 @@
         </div>
 
         <div class="Calendar-Area column">
-            <div class="x">
+            <div class="x" id = "g">
                 2
             </div>
         </div>
 
         <div class="Gmail-Area column">
-            <div class="x">
+            <div class="x" >
                 3
             </div>
         </div>
@@ -69,7 +69,51 @@
                 },
                 contentType: 'application/octet-stream; charset=utf-8',
                 success: function(result) {
-                    // Handle or verify the server response.
+                  console.log(result,"this");
+
+                  
+
+
+
+                //
+                // let gmail_container =  document.querySelector("#g")
+                // let ul = document.createElement('ul')
+                // let sortArray = []
+                //
+                //
+                //     console.log('this is the result', result)
+                //     // result.forEach(e => {
+                //     for(let i = 0; i<result.length;i++){
+                //       console.log(result[i].start.dateTime.split('-')[1]) //string
+                //       console.log(result[i+1].start.dateTime.split('-')) //string
+                //       for(let j = 0; j<)
+
+
+                    // }
+                      //parseout date, order by start time
+                      // obviously, earlier makes it way to the top
+                      // AFTER we want to use this sorted array to populate front end div
+
+
+                      // console.log(e["summary"]);
+                      // console.log(e["start"]["dateTime"].split('T'));
+                      // console.log(e["end"]["dateTime"].slice(11,16));
+                      // let li = document.createElement('li')
+                      // li.innerText = e["summary"]
+                      // let ul2 = document.createElement('ul')
+                      // let date = document.createElement('li')
+                      // let li_s = document.createElement('li')
+                      // let li_e = document.createElement('li')
+                      // date.innerText = e["start"]["dateTime"].split('T')[0]
+                      // li_s.innerText = `Starts at ` + e["start"]["dateTime"].slice(11,16)
+                      // li_e.innerText = `Ends at ` + e["end"]["dateTime"].slice(11,16)
+                      // ul2.append(date,li_s,li_e)
+                      // li.append(ul2)
+                      //
+                      // ul.append(li)
+                    // })//forEach
+                    //  1st for
+                      // gmail_container.append(ul)
                 },
                 processData: false,
                 data: JSON.stringify({ code: authResult['code']} )

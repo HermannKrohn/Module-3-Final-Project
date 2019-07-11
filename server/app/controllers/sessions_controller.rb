@@ -1,8 +1,9 @@
-# require 'rest-client'
 
 class SessionsController < ApplicationController
 
     def googleAuth
+
+
         access_token = nil
         refresh_token = nil
         id_token = nil
@@ -32,18 +33,43 @@ class SessionsController < ApplicationController
         access_token = parsedToken["access_token"]
         refresh_token = parsedToken["refresh_token"]
         id_token = parsedToken["id_token"]
+        id_token_arr = id_token.split(".")
+        id_token_body = id_token_arr[1]
+        decoded_token_body = Base64.decode64(id_token_body)
+        parsed_decoded_token_body = JSON.parse(decoded_token_body)
+        user_id = parsed_decoded_token_body["sub"]
         # message_list = RestClient.get(
         #     "https://www.googleapis.com/gmail/v1/users/#{id_token}/messages",
         #     {"Authorization": "Bearer #{access_token}"}
         # )
         begin
-        message_list = RestClient::Request.execute(method: :get, url: "https://www.googleapis.com/gmail/v1/users/USERID/messages",
-            headers: {"Authorization": "Bearer #{access_token}"})
+        # message_list = RestClient::Request.execute(method: :get, url: "https://www.googleapis.com/gmail/v1/users/USERID/messages",
+        #     headers: {"Authorization": "Bearer #{access_token}"})
+
+        calendar_list = RestClient::Request.execute(method: :get, url: "https://www.googleapis.com/calendar/v3/users/me/calendarList",
+          headers: {"Authorization": "Bearer #{access_token}"})
+# byebug
+          calendarArr = JSON.parse(calendar_list.body)["items"]
+          # test = "help"
+
+        calendarId = nil
+        calendars = calendarArr.map do |calendar|
+            calendarId = calendar["id"]
+            begin
+              JSON.parse(RestClient::Request.execute(method: :get, url: "https://www.googleapis.com/calendar/v3/calendars/#{calendarId}/events",
+                headers: {"Authorization": "Bearer #{access_token}"}).body)
+            rescue
+              {}
+            end
+        # byebug
+        end
+
+
         rescue Exception => e
             byebug
         end
         # EventsController.get_calendars(access_token, refresh_token)
-        byebug
+        render json: calendars
         # user = User.from_omniauth(parsed_token)
         # log_in(user)
         # Access_token is used to authenticate request made from the rails application to the google server
@@ -56,7 +82,7 @@ class SessionsController < ApplicationController
         # redirect_to root_path
     end
 
-    def code 
+    def code
         puts params
     end
 
