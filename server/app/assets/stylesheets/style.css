@@ -20,18 +20,19 @@ body,html{
   border-radius: 25px;
 }
 
-.x{
+.content{
   text-align: center;
-  height: 70%;
+  height: 100%;
   width: 100%;
   /* display:inline-block; */
   /* vertical-align: middle; */
   /* transform: translateY(10%); */
-  position: relative;
+  /* position: relative;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%);
-
+  transform: translate(-50%, -50%); */
 }
+
+.content.{}
 
 

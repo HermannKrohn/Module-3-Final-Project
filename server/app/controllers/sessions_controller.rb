@@ -1,5 +1,3 @@
-# require 'rest-client'
-
 class SessionsController < ApplicationController
 
     def googleAuth
@@ -7,7 +5,12 @@ class SessionsController < ApplicationController
         refresh_token = nil
         id_token = nil
         parsedToken = nil
-        puts "got inside of googleAuth method"
+        userID = nil
+        id_token_arr = nil
+        id_token_body = nil
+        decoded_token_body = nil
+        parsed_decoded_token_body = nil
+        mail_hash_arr = []
         payload = {
             code: params["code"],
             client_id: "247563481751-5v3guf2mir8tffh60n3k80trolcp7cid.apps.googleusercontent.com",
@@ -15,35 +18,45 @@ class SessionsController < ApplicationController
             redirect_uri: "http://localhost:3000",
             grant_type: "authorization_code"
         }
-        begin
-            res_token = RestClient.post(
-                'https://www.googleapis.com/oauth2/v4/token',
-                payload,
-                {'Content-Type': "application/x-www-form-urlencoded"}
-            )
-        rescue Exception => e
-            # byebug
-        end
-        # byebug
-        # Get access tokens from the google server
-        # access_token = request.env["omniauth.auth"]
-        puts access_token
+
+        res_token = RestClient.post(
+            'https://www.googleapis.com/oauth2/v4/token',
+            payload,
+            {'Content-Type': "application/x-www-form-urlencoded"}
+        )
+
         parsedToken = JSON.parse(res_token.body)
         access_token = parsedToken["access_token"]
         refresh_token = parsedToken["refresh_token"]
         id_token = parsedToken["id_token"]
-        # message_list = RestClient.get(
-        #     "https://www.googleapis.com/gmail/v1/users/#{id_token}/messages",
-        #     {"Authorization": "Bearer #{access_token}"}
-        # )
-        begin
-        message_list = RestClient::Request.execute(method: :get, url: "https://www.googleapis.com/gmail/v1/users/USERID/messages",
+        id_token_arr = id_token.split(".")
+        id_token_body = id_token_arr[1]
+        decoded_token_body = Base64.decode64(id_token_body)
+        parsed_decoded_token_body = JSON.parse(decoded_token_body)
+        userID = parsed_decoded_token_body["sub"]
+        
+        message_list = RestClient::Request.execute(method: :get, url: "https://www.googleapis.com/gmail/v1/users/#{userID}/messages",
             headers: {"Authorization": "Bearer #{access_token}"})
-        rescue Exception => e
-            byebug
+
+        parsed_message_list = JSON.parse(message_list)
+
+        parsed_message_list["messages"].each do |message_hash|
+            current_msg_id = message_hash["id"]
+            current_msg = RestClient::Request.execute(method: :get, url: "https://www.googleapis.com/gmail/v1/users/#{userID}/messages/#{current_msg_id}",
+            headers: {"Authorization": "Bearer #{access_token}", Accept: "application/json"})
+            parsed_current_msg = JSON.parse(current_msg.body)
+            parsed_current_msg_headers = parsed_current_msg["payload"]["headers"]
+            parsed_current_msg_headers.each do |hash|
+                if hash["name"] == "Subject"
+                    current_msg_hash = {"subject" => hash["value"]}
+                    mail_hash_arr.push(current_msg_hash)
+                end
+            end
+            puts "Message Added to Array"
         end
-        # EventsController.get_calendars(access_token, refresh_token)
+        puts "DONE CREATING MESSAGES"
         byebug
+        render json: mail_hash_arr
         # user = User.from_omniauth(parsed_token)
         # log_in(user)
         # Access_token is used to authenticate request made from the rails application to the google server

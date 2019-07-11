@@ -39,8 +39,13 @@
         </div>
 
         <div class="Gmail-Area column">
-            <div class="x">
-                3
+            <div class="content">
+                <div class="title">
+                    Gmail
+                </div>
+                <div class="mail">
+                    
+                </div>
             </div>
         </div>
 
@@ -69,7 +74,8 @@
                 },
                 contentType: 'application/octet-stream; charset=utf-8',
                 success: function(result) {
-                    // Handle or verify the server response.
+                    console.log(result)
+                    yay();
                 },
                 processData: false,
                 data: JSON.stringify({ code: authResult['code']} )
@@ -78,8 +84,12 @@
                 // There was an error.
             }
         }
+        function yay(){
+            GA = document.querySelector(".Gmail-Area")
+            GA.innerText = "GDSDFK"
+        }
         </script>
-
+        
         <!-- <a href="#" onclick="signOut();">Sign out</a>
         <div class="g-signin2 bottom-right" data-onsuccess="onSignIn" data-theme="dark"></div>
         <script>
