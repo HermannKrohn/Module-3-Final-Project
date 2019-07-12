@@ -35,30 +35,30 @@ class SessionsController < ApplicationController
         parsed_decoded_token_body = JSON.parse(decoded_token_body)
         userID = parsed_decoded_token_body["sub"]
         
-        message_list = RestClient::Request.execute(method: :get, url: "https://www.googleapis.com/gmail/v1/users/#{userID}/messages",
-            headers: {"Authorization": "Bearer #{access_token}"})
+        # message_list = RestClient::Request.execute(method: :get, url: "https://www.googleapis.com/gmail/v1/users/#{userID}/messages",
+        #     headers: {"Authorization": "Bearer #{access_token}"})
 
-        parsed_message_list = JSON.parse(message_list)
+        # parsed_message_list = JSON.parse(message_list)
 
-        parsed_message_list["messages"].each do |message_hash|
-            current_msg_id = message_hash["id"]
-            current_msg = RestClient::Request.execute(method: :get, url: "https://www.googleapis.com/gmail/v1/users/#{userID}/messages/#{current_msg_id}",
-            headers: {"Authorization": "Bearer #{access_token}", Accept: "application/json"})
-            parsed_current_msg = JSON.parse(current_msg.body)
-            parsed_current_msg_headers = parsed_current_msg["payload"]["headers"]
-            current_msg_hash = {"sender" => "N/A", "subject" => "N/A"}
-            parsed_current_msg_headers.each do |hash|
-                if hash["name"] == "From"
-                    sender_name_arr = hash["value"].split("<")
-                    current_msg_hash["sender"] = sender_name_arr[0]
-                elsif hash["name"] == "Subject"
-                    current_msg_hash["subject"] = hash["value"]
-                end
-            end
-            mail_hash_arr.push(current_msg_hash)
-            puts "Message Added to Array"
-        end
-        puts "DONE CREATING MESSAGES"
+        # parsed_message_list["messages"].each do |message_hash|
+        #     current_msg_id = message_hash["id"]
+        #     current_msg = RestClient::Request.execute(method: :get, url: "https://www.googleapis.com/gmail/v1/users/#{userID}/messages/#{current_msg_id}",
+        #     headers: {"Authorization": "Bearer #{access_token}", Accept: "application/json"})
+        #     parsed_current_msg = JSON.parse(current_msg.body)
+        #     parsed_current_msg_headers = parsed_current_msg["payload"]["headers"]
+        #     current_msg_hash = {"sender" => "N/A", "subject" => "N/A"}
+        #     parsed_current_msg_headers.each do |hash|
+        #         if hash["name"] == "From"
+        #             sender_name_arr = hash["value"].split("<")
+        #             current_msg_hash["sender"] = sender_name_arr[0]
+        #         elsif hash["name"] == "Subject"
+        #             current_msg_hash["subject"] = hash["value"]
+        #         end
+        #     end
+        #     mail_hash_arr.push(current_msg_hash)
+        #     puts "Message Added to Array"
+        # end
+        # puts "DONE CREATING MESSAGES"
 
         calendar_list = RestClient::Request.execute(method: :get, url: "https://www.googleapis.com/calendar/v3/users/me/calendarList",
             headers: {"Authorization": "Bearer #{access_token}"})
@@ -90,9 +90,15 @@ class SessionsController < ApplicationController
             rescue Exception => e
             end
         end
+
+        poi_res_json = RestClient.get "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=#{params['latitude']},#{params['longitude']}&radius=1500&type=restaurant&key=AIzaSyDZPgGlSIGXZmfNNkT7LoO8cr7joNMyqqo"
+        parsed_POI_json = JSON.parse(poi_res_json) 
+        parsed_POI_arr = parsed_POI_json["results"]
+
         output_hash = {
             "emails" => mail_hash_arr,
-            "calendar_events" => upcoming_events_only_arr
+            "calendar_events" => upcoming_events_only_arr,
+            "POIs" => parsed_POI_arr
         }
         render json: output_hash
     end

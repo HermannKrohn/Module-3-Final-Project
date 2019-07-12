@@ -20,8 +20,13 @@
         <div class="container">
             
             <div class="POI-Area column">
-                <div class="x">
-                    1
+                <div class="content">
+                    <div class="title">
+                        Restaurants
+                    </div>
+                    <div class="poi">
+                        
+                    </div>
                 </div>
             </div>
 
@@ -50,76 +55,103 @@
 
             
         <script>
-        $('#signinButton').click(function() {
-            // signInCallback defined in step 6.
-            auth2.grantOfflineAccess().then(signInCallback);
-        });
-        function signInCallback(authResult) {
-            //console.log(authResult)
-            if (authResult['code']) {
+            var lat=0;
+            var long=0;
+            navigator.geolocation.getCurrentPosition(function(r){
+                lat = r.coords.latitude;
+                long = r.coords.longitude;
+            })
+            $('#signinButton').click(function() {
+                // signInCallback defined in step 6.
+                auth2.grantOfflineAccess().then(signInCallback);
+            });
+            function signInCallback(authResult) {
+                //console.log(authResult)
+                if (authResult['code']) {
 
-                // Hide the sign-in button now that the user is authorized, for example:
-                $('#signinButton').attr('style', 'display: none');
+                    // Hide the sign-in button now that the user is authorized, for example:
+                    $('#signinButton').attr('style', 'display: none');
 
-                // Send the code to the server
-                $.ajax({
-                type: 'POST',
-                url: 'http://localhost:3000/auth/goggle_oauth2/callback',
-                // Always include an `X-Requested-With` header in every AJAX request,
-                // to protect against CSRF attacks.
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Content-Type': 'application/json'
-                },
-                contentType: 'application/octet-stream; charset=utf-8',
-                success: function(result) {
-                    renderEmails(result.emails)
-                    renderCalendarEvents(result.calendar_events)
-                },
-                processData: false,
-                data: JSON.stringify({ code: authResult['code']} )
-                });
-            } else {
-                // There was an error.
+                    // Send the code to the server
+                    $.ajax({
+                    type: 'POST',
+                    url: 'http://localhost:3000/auth/goggle_oauth2/callback',
+                    // Always include an `X-Requested-With` header in every AJAX request,
+                    // to protect against CSRF attacks.
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json'
+                    },
+                    contentType: 'application/octet-stream; charset=utf-8',
+                    success: function(result) {
+                        renderEmails(result.emails)
+                        renderCalendarEvents(result.calendar_events)
+                        renderRestaurants(result.POIs)
+                    },
+                    processData: false,
+                    data: JSON.stringify({ code: authResult['code'], longitude: long, latitude: lat} )
+                    });
+                } else {
+                    // There was an error.
+                }
             }
-        }
-        function renderEmails(emailArr){
-            let emailArea = document.querySelector(".mail")
-            for(let i = 0; i < emailArr.length; i++){
-                let email = document.createElement('div')
-                email.setAttribute('class', 'email-instance')
-                let emailSender = document.createElement('h3')
-                emailSender.setAttribute('class', 'email-sender')
-                emailSender.innerText = "From: " + emailArr[i].sender
-                let emailSubject = document.createElement('p')
-                emailSubject.setAttribute('class','email-subject')
-                emailSubject.innerText = "Subject: " + emailArr[i].subject
-                email.append(emailSender)
-                email.append(emailSubject)
-                emailArea.append(email)
+            function renderEmails(emailArr){
+                let emailArea = document.querySelector(".mail")
+                for(let i = 0; i < emailArr.length; i++){
+                    let email = document.createElement('div')
+                    email.setAttribute('class', 'email-instance')
+                    let emailSender = document.createElement('h3')
+                    emailSender.setAttribute('class', 'email-sender')
+                    emailSender.innerText = "From: " + emailArr[i].sender
+                    let emailSubject = document.createElement('p')
+                    emailSubject.setAttribute('class','email-subject')
+                    emailSubject.innerText = "Subject: " + emailArr[i].subject
+                    email.append(emailSender)
+                    email.append(emailSubject)
+                    emailArea.append(email)
+                }
             }
-        }
 
-        function renderCalendarEvents(eventsArr){
-            let eventsArea = document.querySelector(".events")
-            for(let i = 0; i < eventsArr.length; i++){
-                let event = document.createElement('div')
-                event.setAttribute('class', 'event-instance')
-                let eventTitle = document.createElement('h3')
-                eventTitle.setAttribute('class', 'event-title')
-                eventTitle.innerText = "Event: " + eventsArr[i].summary
-                let eventLocation = document.createElement('p')
-                eventLocation.setAttribute('class', 'event-location')
-                eventLocation.innerText = "Location: " + eventsArr[i].location
-                let eventDate = document.createElement('p')
-                eventDate.setAttribute('class', 'event-date')
-                eventDate.innerText = "Date: " + new Date(eventsArr[i].start.dateTime)
-                event.append(eventTitle)
-                event.append(eventLocation)
-                event.append(eventDate)
-                eventsArea.append(event)
+            function renderCalendarEvents(eventsArr){
+                let eventsArea = document.querySelector(".events")
+                for(let i = 0; i < eventsArr.length; i++){
+                    let event = document.createElement('div')
+                    event.setAttribute('class', 'event-instance')
+                    let eventTitle = document.createElement('h3')
+                    eventTitle.setAttribute('class', 'event-title')
+                    eventTitle.innerText = "Event: " + eventsArr[i].summary
+                    let eventLocation = document.createElement('p')
+                    eventLocation.setAttribute('class', 'event-location')
+                    eventLocation.innerText = "Location: " + eventsArr[i].location
+                    let eventDate = document.createElement('p')
+                    eventDate.setAttribute('class', 'event-date')
+                    eventDate.innerText = "Date: " + new Date(eventsArr[i].start.dateTime)
+                    event.append(eventTitle)
+                    event.append(eventLocation)
+                    event.append(eventDate)
+                    eventsArea.append(event)
+                }
             }
-        }
+
+            function renderRestaurants(poiArr){
+                let poiArea = document.querySelector('.poi')
+                for(let x = 0; x < poiArr.length; x++){
+                    console.log(x)
+                    let poi = document.createElement('div')
+                    poi.setAttribute('class','poi-instance')
+                    let poiTitle = document.createElement('h3')
+                    poiTitle.setAttribute('class','poi-title')
+                    poiTitle.innerText = poiArr[x].name
+                    let poiAddress = document.createElement('p')
+                    poiAddress.setAttribute('class','poi-address')
+                    poiAddress.innerText = poiArr[x].vicinity
+                    let poiRating = document.createElement('p')
+                    poiRating.setAttribute('class','poi-rating')
+                    poiRating.innerText = "Rating: " + poiArr[x].rating
+                    poi.append(poiTitle, poiAddress, poiRating)
+                    poiArea.append(poi)
+                }
+            }
         </script>
             
     </body>
