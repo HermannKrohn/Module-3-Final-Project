@@ -46,17 +46,59 @@ class SessionsController < ApplicationController
             headers: {"Authorization": "Bearer #{access_token}", Accept: "application/json"})
             parsed_current_msg = JSON.parse(current_msg.body)
             parsed_current_msg_headers = parsed_current_msg["payload"]["headers"]
+            current_msg_hash = {"sender" => "N/A", "subject" => "N/A"}
             parsed_current_msg_headers.each do |hash|
-                if hash["name"] == "Subject"
-                    current_msg_hash = {"subject" => hash["value"]}
-                    mail_hash_arr.push(current_msg_hash)
+                if hash["name"] == "From"
+                    sender_name_arr = hash["value"].split("<")
+                    current_msg_hash["sender"] = sender_name_arr[0]
+                elsif hash["name"] == "Subject"
+                    current_msg_hash["subject"] = hash["value"]
                 end
             end
+            mail_hash_arr.push(current_msg_hash)
             puts "Message Added to Array"
         end
         puts "DONE CREATING MESSAGES"
-        byebug
-        render json: mail_hash_arr
+
+        calendar_list = RestClient::Request.execute(method: :get, url: "https://www.googleapis.com/calendar/v3/users/me/calendarList",
+            headers: {"Authorization": "Bearer #{access_token}"})
+
+        parsed_calendar_list = JSON.parse(calendar_list.body)["items"]
+        calendar_id = nil
+        all_calendar_events = []
+        calendar_events = parsed_calendar_list.map do |calendar|
+            begin
+                calendar_id = calendar["id"]
+                current_calendar_event = RestClient::Request.execute(method: :get, url: "https://www.googleapis.com/calendar/v3/calendars/#{calendar_id}/events",
+                    headers: {"Authorization": "Bearer #{access_token}"})
+                parsed_current_calendar_event = JSON.parse(current_calendar_event)
+                all_calendar_events.push(parsed_current_calendar_event)
+            rescue Exception => e
+                # byebug
+            end
+        end
+        all_calendar_events = all_calendar_events[0]["items"]
+        upcoming_events_only_arr = []
+        all_calendar_events.each do |event_hash|
+            begin
+                date_string = event_hash["start"]["dateTime"]
+                date_string_arr = date_string.split("T")
+                event_date = Date.strptime(date_string_arr[0], "%Y-%m-%d")
+                current_date = Date.strptime(Time.now.to_s.split(" ")[0], "%Y-%m-%d")
+                if event_date > current_date
+                    upcoming_events_only_arr.push(event_hash)
+                end
+            rescue Exception => e
+            end
+        end
+        output_hash = {
+            "emails" => mail_hash_arr,
+            "calendar_events" => upcoming_events_only_arr
+        }
+        # byebug
+        render json: output_hash
+
+
         # user = User.from_omniauth(parsed_token)
         # log_in(user)
         # Access_token is used to authenticate request made from the rails application to the google server
