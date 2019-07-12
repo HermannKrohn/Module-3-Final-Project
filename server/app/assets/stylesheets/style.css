@@ -50,16 +50,19 @@ body,html{
   left: 50%;
   transform: translateX(-50%);
   overflow: scroll;
+  /* padding: 0px 15px; */
 }
 
 .email-sender{
   color: black;
   font-weight: 700;
   text-align: left;
+  padding: 0px 15px;
 }
 
 .email-subject{
   text-align: left;
+  padding: 0px 15px;
 }
 
 .email-instance, .event-instance, .poi-instance{
@@ -74,9 +77,11 @@ body,html{
   color: black;
   font-weight: 700;
   text-align: left;
+  padding: 0px 15px;
 }
 
 .event-instance p, .poi-instance p{
   text-align: left;
+  padding: 0px 15px;
 }
 
