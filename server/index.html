@@ -2,39 +2,79 @@
 <head>
 
     <link rel="style-sheet" href="./style.css">
-
-    <!-- <meta name="google-signin-scope" content="profile email">
-    <meta name="google-signin-client_id" content="812844936506-u8u9ou3uvgpjkbhg2shr8s69ogi8ssqg.apps.googleusercontent.com">
-    <script src="https://apis.google.com/js/platform.js" async defer></script> -->
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
     </script>
     <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer>
     </script>
     <script>
-            function start() {
-              gapi.load('auth2', function() {
-                auth2 = gapi.auth2.init({
-                  client_id: '247563481751-5v3guf2mir8tffh60n3k80trolcp7cid.apps.googleusercontent.com',
-                  scope: "https://mail.google.com"
-                  // Scopes to request in addition to 'profile' and 'email'
-                  //scope: 'additional_scope'
-                });
-              });
-            }
-          </script>
+        //
+        // navigator.geolocation.getCurrentPosition(function(r){
+        //         // console.log(r)
+        //         // console.log(r.coords.latitude)
+        //         // console.log(r.coords.longitude)
+        //         var lat = r.coords.latitude;
+        //         var long = r.coords.longitude
+
+                
+                // //
+                // fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${long}&radius=1500&type=restaurant&key=AIzaSyDZPgGlSIGXZmfNNkT7LoO8cr7joNMyqqo`).then(function(e){
+                //     return e.json()
+                // }).then(r => {
+                //     console.log(r)
+                // })
+
+                // // alt fetch
+                // $.ajax({
+                // type: 'GET',
+                // url: `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${long}&radius=1500&type=restaurant&key=AIzaSyDZPgGlSIGXZmfNNkT7LoO8cr7joNMyqqo`,
+                // headers: {
+                //     'X-Requested-With': 'XMLHttpRequest',
+                //     'Content-Type': 'application/json'
+                // },
+                // contentType: 'application/octet-stream; charset=utf-8',
+                // success: function(result) {
+                //     console.log(result)
+                // }
+                // // body: JSON.stringify({
+                // //     latitude: lat,
+                // //     longitude: long
+                // // })
+                // });
+                //
+        //})
+                
+
+        function start() {
+            gapi.load('auth2', function() {
+            auth2 = gapi.auth2.init({
+                client_id: '247563481751-5v3guf2mir8tffh60n3k80trolcp7cid.apps.googleusercontent.com',
+                scope: "https://mail.google.com"
+                // Scopes to request in addition to 'profile' and 'email'
+                //scope: 'additional_scope'
+            });
+            });
+        }
+    </script>
 </head>
 <body> 
     <div class="container">
         
         <div class="POI-Area column">
-            <div class="x">
-                1
+            <div class="content">
+                <div class="title">
+                    Restaurants
+                </div>
+                <div class="poi">
+                    
+                </div>
             </div>
         </div>
 
         <div class="Calendar-Area column">
-            <div class="x">
-                2
+            <div class="content">
+                <div class="title">
+                    POI
+                </div>
             </div>
         </div>
 
@@ -51,23 +91,26 @@
 
         <button id="signinButton">Sign in with Google</button>
         <script>
+            var lat=0;
+            var long=0;
+            navigator.geolocation.getCurrentPosition(function(r){
+                lat = r.coords.latitude;
+                long = r.coords.longitude;
+                console.log(lat)
+            })
+
         $('#signinButton').click(function() {
             // signInCallback defined in step 6.
             auth2.grantOfflineAccess().then(signInCallback);
         });
         function signInCallback(authResult) {
             //console.log(authResult)
+            console.log(long)
             if (authResult['code']) {
-
-                // Hide the sign-in button now that the user is authorized, for example:
                 $('#signinButton').attr('style', 'display: none');
-
-                // Send the code to the server
                 $.ajax({
                 type: 'POST',
                 url: 'http://localhost:3000/auth/goggle_oauth2/callback',
-                // Always include an `X-Requested-With` header in every AJAX request,
-                // to protect against CSRF attacks.
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'Content-Type': 'application/json'
@@ -75,46 +118,35 @@
                 contentType: 'application/octet-stream; charset=utf-8',
                 success: function(result) {
                     console.log(result)
-                    yay();
+                    // yay();
+                    renderRestaurant(result)
                 },
                 processData: false,
-                data: JSON.stringify({ code: authResult['code']} )
+                data: JSON.stringify({ code: authResult['code'], longitude: long, latitude: lat})
                 });
             } else {
                 // There was an error.
             }
         }
-        function yay(){
-            GA = document.querySelector(".Gmail-Area")
-            GA.innerText = "GDSDFK"
+        function renderRestaurant(poiArr){
+            let poiArea = document.querySelector('.poi')
+            for(let x=0;x<poiArr.length;x++){
+                let poi = document.createElement('div')
+                poi.setAttribute('class','poi-instance')
+                let poiTitle = document.createElement('h3')
+                poiTitle.setAttribute('class','poi-title')
+                poiTitle.innerText = poiArr[x].name
+                let poiAddress = document.createElement('p')
+                poiAddress.setAttribute('class','poi-address')
+                poiAddress.innerText = poiArr[x].vicinity
+                let poiRating = document.createElement('p')
+                poiRating.setAttribute('class','poi-rating')
+                poiRating.innerText = "Rating: "+poiArr[x].rating
+                poi.append(poiTitle, poiAddress, poiRating)
+                poiArea.append(poi)
+            }
         }
         </script>
-        
-        <!-- <a href="#" onclick="signOut();">Sign out</a>
-        <div class="g-signin2 bottom-right" data-onsuccess="onSignIn" data-theme="dark"></div>
-        <script>
-        function onSignIn(googleUser) {
-            window.googleUser = googleUser
-            // Useful data for your client-side scripts:
-            var profile = googleUser.getBasicProfile();
-            console.log("ID: " + profile.getId()); // Don't send this directly to your server!
-            console.log('Full Name: ' + profile.getName());
-            console.log('Given Name: ' + profile.getGivenName());
-            console.log('Family Name: ' + profile.getFamilyName());
-            console.log("Image URL: " + profile.getImageUrl());
-            console.log("Email: " + profile.getEmail());
-
-            // The ID token you need to pass to your backend:
-            var id_token = googleUser.getAuthResponse().id_token;
-            console.log("ID Token: " + id_token);
-        }
-        function signOut() {
-            var auth2 = gapi.auth2.getAuthInstance();
-            auth2.signOut().then(function () {
-            console.log('User signed out.');
-            });
-        }
-        </script> -->
     </div>
 
 </body>
