@@ -41,7 +41,7 @@ body,html{
   margin-bottom: 5%;
 }
 
-.content .mail{
+.content .mail, .content .events{
   height: 87%;
   width: 95%;
   background-color: rgb(220,220,220);
@@ -62,11 +62,21 @@ body,html{
   text-align: left;
 }
 
-.email-instance{
+.email-instance, .event-instance{
   border-bottom: 1px solid rgb(102, 100, 100);
 }
 
-.email-instance:last-child{
+.email-instance:last-child, .event-instance:last-child{
   border-bottom: none;
+}
+
+.event-title{
+  color: black;
+  font-weight: 700;
+  text-align: left;
+}
+
+.event-instance p{
+  text-align: left;
 }
 

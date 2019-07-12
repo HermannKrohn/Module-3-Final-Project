@@ -4,7 +4,6 @@ Rails.application.routes.draw do
   get '/', to: 'homepage#home'
   post 'auth/:provider/callback', to: 'sessions#googleAuth'
   get 'auth/failure', to: redirect('/')
-  post '/code', to: 'sessions#code'
-  get '/.json', to: 'sessions#test'
+  # get '/.json', to: 'sessions#test'
 
 end

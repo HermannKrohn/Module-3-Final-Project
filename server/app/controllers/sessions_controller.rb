@@ -74,7 +74,6 @@ class SessionsController < ApplicationController
                 parsed_current_calendar_event = JSON.parse(current_calendar_event)
                 all_calendar_events.push(parsed_current_calendar_event)
             rescue Exception => e
-                # byebug
             end
         end
         all_calendar_events = all_calendar_events[0]["items"]
@@ -85,7 +84,7 @@ class SessionsController < ApplicationController
                 date_string_arr = date_string.split("T")
                 event_date = Date.strptime(date_string_arr[0], "%Y-%m-%d")
                 current_date = Date.strptime(Time.now.to_s.split(" ")[0], "%Y-%m-%d")
-                if event_date > current_date
+                if event_date >= current_date
                     upcoming_events_only_arr.push(event_hash)
                 end
             rescue Exception => e
@@ -95,27 +94,10 @@ class SessionsController < ApplicationController
             "emails" => mail_hash_arr,
             "calendar_events" => upcoming_events_only_arr
         }
-        # byebug
         render json: output_hash
-
-
-        # user = User.from_omniauth(parsed_token)
-        # log_in(user)
-        # Access_token is used to authenticate request made from the rails application to the google server
-        # user.google_token = access_token.credentials.token
-        # Refresh_token to request new access_token
-        # Note: Refresh_token is only sent once during the first request
-        # refresh_token = access_token.credentials.refresh_token
-        # user.google_refresh_token = refresh_token if refresh_token.present?
-        # user.save
-        # redirect_to root_path
     end
 
-    def code 
-        puts params
-    end
-
-    def test
-        puts ("JSONNNNNN")
-    end
+    # def test
+    #     puts ("JSONNNNNN")
+    # end
 end
